@@ -18,7 +18,7 @@ from single_parent_static_mutation_random_color import Population, DNA
     - Colors are picked random from all colors existing in the original image
 """
 
-NAME = "single_parent_static_mutation_new_fitness_color_array"
+NAME = "single_parent_static_mutation_reduced_color_array"
 DIR = create_dir_name(NAME)
 
 SAVE_BEST_DNA_FREQUENCY = 1000
@@ -34,12 +34,14 @@ distance_between_points = BaseUtils.get_distance_between_points(POINTS_AMOUNT, I
 TRIANGLE_AMOUNT = (POINTS_AMOUNT - 1) * 2 * (POINTS_AMOUNT - 1)
 
 POINT_MUTATION = 0.005
-COLOR_MUTATION = 0.00075
+COLOR_MUTATION = 0.0003
 
 def new_fitness_func(ref_data, data):
     return np.maximum(np.sum(8000 * np.power(1.06, -np.abs(ref_data - data)) - 1), 0) * 0.000001
 
 BaseUtils.fitness_func = new_fitness_func
+
+colors = BaseUtils.reduce_color_amount(colors)
 
 class Utils(BaseUtils):
     def __init__(self, colors, points_amount):

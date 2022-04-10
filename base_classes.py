@@ -8,9 +8,12 @@ import os
 from datetime import datetime
 import copy
 import json
+import math
 
 PROCESSING = 8
 ISOLATION_CYCLES = 1
+
+GRADIENT_THRESHHOLD = 75
 
 NOW = datetime.now().strftime("%Y_%m_%d__%H_%M_%S")
 
@@ -58,6 +61,36 @@ class BaseUtils:
             image_size[0] / (points_amount - 1), 
             image_size[1] / (points_amount - 1)
         )
+
+    @staticmethod
+    def reduce_color_amount(colors):
+        colors.sort(key=lambda c: c[2] + c[1] * 1000 + c[0] * 1000000)
+        
+        clusters = []
+        last_cluster_index = 0
+        last_color_split = colors[0]
+
+        for i in range(len(colors) - 1):
+            from_color = last_color_split #colors[i]
+            to_color = colors[i + 1]
+
+            gradient = math.sqrt((from_color[0] - to_color[0]) ** 2 + (from_color[1] - to_color[1]) ** 2 + (from_color[2] - to_color[2]) ** 2)
+
+            if gradient > GRADIENT_THRESHHOLD:
+                clusters.append(np.array(colors[last_cluster_index:i]))
+                last_cluster_index = i
+                last_color_split = to_color
+
+        color_values = []
+
+        print(len(clusters))
+
+        for c in clusters:
+            mean_color = list(map(int, list(np.mean(np.array(c), axis=0))))
+
+            color_values.append(mean_color)
+
+        return color_values
 
 class Point:
     def __init__(self, index, points_amount, distance_between_points):
